@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>街ツクール改造版</title>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <link rel="stylesheet" href="reset.css" />
+        <link rel="stylesheet" href="styles.css" />
+    </head>
+ <body>
+    <h1>宇宙つくーった</h1>
+    <div class="rectangle">
+        <div class="box" id="grid"></div>
+    </div>
+    <h2>このゲームは、愛する<a hraf="https://www.p-game.jp/game/190/detail">街ツクール</a>のパロディゲームとなっております↷</h2>
+    
+    <script>
+    // ゲームボードの行数と列数を設定
+    const rows = 5;
+    const columns = 4;
+
+    // 使用する色の配列
+    const colors = ["red", "green", "blue"];
+
+    // ゲームボードの情報を格納する2次元配列
+    let grid = [];
+
+    // ゲームボードを作成する関数
+    function createGrid() {
+
+     // ゲームボードのコンテナ要素を取得
+     const gridContainer = document.getElementById("grid");
+
+     // 行ごとに要素を作成し、ゲームボードに追加する
+     for (let i = 0; i < rows; i++) {
+      const row = document.createElement("box");
+      row.classList.add("row");
+      gridContainer.appendChild(row);
+      grid[i] = [];
+
+      // 列ごとに正方形を作成し、行に追加する
+      for (let j = 0; j < columns; j++) {
+        const square = document.createElement("box");
+        square.classList.add("square");
+        square.addEventListener("click", () => handleClick(i, j));
+        const color = randomColor();
+        square.style.backgroundColor = color;
+        row.appendChild(square);
+        grid[i][j] = square;
+      }
+     }
+    }
+
+<!---->
+  // 正方形がクリックされたときの処理を行う関数
+  function handleClick(row, column) {
+    // クリックされた正方形を取得
+    const clickedSquare = grid[row][column];
+
+    // クリックされた正方形が連結されていない場合は処理を終了
+    if (!clickedSquare.connected) {
+      return;
+    }
+
+    // クリックされた正方形と同じ色の連結された正方形を検索
+    const connectedSquares = findConnectedSquares(row, column, clickedSquare.color);
+
+    // 連結された正方形が2つ以上ある場合は処理を実行
+    if (connectedSquares.length > 1) {
+      // 連結された正方形を削除
+      connectedSquares.forEach((square) => {
+        square.element.style.backgroundColor = "";
+        square.connected = false;
+      });
+
+      // 空白のスペースを埋める
+      fillEmptySpaces();
+    }
+  }
+
+  // 指定の座標から連結された正方形を検索する再帰関数
+  function findConnectedSquares(row, column, selectedColor) {
+    // 連結された正方形を格納する配列
+    const connectedSquares = [];
+
+    // 訪れた正方形を追跡するためのSetオブジェクト
+    const visited = new Set();
+
+    // 深さ優先探索（DFS）を実行して連結された正方形
+    function findConnectedSquares(row, column, selectedColor) {
+    // 連結された正方形を格納する配列
+    const connectedSquares = [];
+
+    // 訪れた正方形を追跡するためのSetオブジェクト
+    const visited = new Set();
+
+    // 再帰関数の定義
+    function dfs(r, c) {
+      // 座標が範囲外の場合や既に訪れた正方形の場合、または選択された色と異なる色の場合は処理を終了
+      if (
+        r < 0 ||
+        r >= rows ||
+        c < 0 ||
+        c >= columns ||
+        visited.has(`${r}-${c}`) ||
+        grid[r][c].color !== selectedColor
+      ) {
+        return;
+      }
+
+      // 座標を訪れたとしてマークし、連結された正方形として追加
+      visited.add(`${r}-${c}`);
+      connectedSquares.push(grid[r][c]);
+
+      // 上下左右の隣接する正方形に対して再帰的に探索を行う
+      dfs(r - 1, c); // 上
+      dfs(r + 1, c); // 下
+      dfs(r, c - 1); // 左
+      dfs(r, c + 1); // 右
+    }
+
+    // 初期の座標から再帰関数を呼び出し、連結された正方形を探索
+    dfs(row, column);
+
+    // 連結された正方形を返す
+    return connectedSquares;
+  }
+  // 空白のスペースを埋める関数
+  function fillEmptySpaces() {
+    // 列ごとに処理を実行
+    for (let j = 0; j < columns; j++) {
+      let emptySpaces = 0;
+
+      // 下から上に向かってスペースを埋める
+      for (let i = rows - 1; i >= 0; i--) {
+        // 正方形が空白の場合
+        if (grid[i][j].color === "") {
+          emptySpaces++;
+          // 正方形にランダムな色を割り当て、連結された状態に設定
+          grid[i][j].color = randomColor();
+          grid[i][j].element.style.backgroundColor = grid[i][j].color;
+          grid[i][j].connected = true;
+        }
+        // 空白でない場合
+        else if (emptySpaces > 0) {
+          const currentColor = grid[i][j].color;
+          // 現在の正方形の色を空白スペースの上の正方形に移動
+          grid[i + emptySpaces][j].color = currentColor;
+          grid[i + emptySpaces][j].element.style.backgroundColor = currentColor;
+          grid[i + emptySpaces][j].connected = true;
+          // 現在の正方形を空白に設定
+          grid[i][j].color = "";
+          grid[i][j].element.style.backgroundColor = "";
+          grid[i][j].connected = false;
+        }
+      }
+    }
+  }
+
+  function randomColor() {
+      const randomIndex = Math.floor(Math.random() * colors.length);
+      return colors[randomIndex];
+    }
+
+    createGrid()
+  </script>
+ </body>
+</html>

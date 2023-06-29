@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>街ツクール改造版</title>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <link rel="stylesheet" href="reset.css" />
+        <link rel="stylesheet" href="styles.css" />
+    </head>
+ <body>
+    <h1>宇宙つくーった</h1>
+    <div class="rectangle">
+        <div class="box" id="grid"></div>
+    </div>
+    <h2>このゲームは、愛する<a hraf="https://www.p-game.jp/game/190/detail">街ツクール</a>のパロディゲームとなっております↷</h2>
+    
+    <script>
+    // ゲームボードの行数と列数を設定
+    const rows = 5;
+    const columns = 4;
+
+    // 使用する色の配列
+    const colors = ["red", "green", "blue"];
+
+    // ゲームボードの情報を格納する2次元配列
+    let grid = [];
+
+    // ゲームボードを作成する関数
+    function createGrid() {
+
+     // ゲームボードのコンテナ要素を取得
+     const gridContainer = document.getElementById("grid");
+
+     // 行ごとに要素を作成し、ゲームボードに追加する
+     for (let i = 0; i < rows; i++) {
+      const row = document.createElement("box");
+      row.classList.add("row");
+      gridContainer.appendChild(row);
+      grid[i] = [];
+
+      // 列ごとに正方形を作成し、行に追加する
+      for (let j = 0; j < columns; j++) {
+        const square = document.createElement("box");
+        square.classList.add("square");
+        square.addEventListener("click", () => handleClick(i, j));
+        const color = randomColor();
+        square.style.backgroundColor = color;
+        row.appendChild(square);
+        grid[i][j] = square;
+      }
+     }
+    }
+
+  function randomColor() {
+      const randomIndex = Math.floor(Math.random() * colors.length);
+      return colors[randomIndex];
+    }
+
+    createGrid();
+  </script>
+ </body>
+</html>
